@@ -12,7 +12,7 @@ class RamMemory {
         vector<string> memoryProcesses;
         int size;
     public:
-        RamMemory(int size);
+        RamMemory(int size, vector<string> initialProcesses);
         ~RamMemory();
         void write(int value, int address);
         int read(int address);

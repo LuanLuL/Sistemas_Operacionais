@@ -1,6 +1,6 @@
 #include "RamMemory.hpp"
 
-RamMemory::RamMemory(int size) {
+RamMemory::RamMemory(int size, vector<string> initialProcesses) {
     if(size <= 0){
         throw invalid_argument("RamMemory::RamMemory(The memory's size must be bigger than 1)");
     }
@@ -9,6 +9,7 @@ RamMemory::RamMemory(int size) {
     for (int i = 0; i < this->size; ++i) {
         this->memoryCells[i] = 0;
     }
+    this->memoryProcesses = initialProcesses;
 }
 
 RamMemory::~RamMemory() {
