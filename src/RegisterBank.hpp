@@ -1,8 +1,8 @@
-#ifndef REGISTER_BANK
-#define REGISTER_BANK
+#ifndef REGISTER_BANK_HPP
+#define REGISTER_BANK_HPP
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -23,6 +23,7 @@ class RegisterBank {
     Register createRegister(int value, bool dirty);
     int getValue(int address);
     void setValue(int address, int value);
+    bool getStatus(int address);
     void setDirty(int address);
     void setClean(int address);
     int getPc();

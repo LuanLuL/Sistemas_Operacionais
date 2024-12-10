@@ -32,6 +32,13 @@ void RegisterBank::setValue(int address, int value) {
     this->registers[address].value = value;
 }
 
+bool RegisterBank::getStatus(int address) {
+    if (address < 0 || address >= this->size) {
+        throw out_of_range("RegisterBank::setValue(Address is out of range)");
+    }
+    return this->registers[address].dirty;
+}
+
 void RegisterBank::setDirty(int address) {
     if (address < 0 || address >= this->size) {
         throw out_of_range("RegisterBank::setDirty(Address is out of range)");

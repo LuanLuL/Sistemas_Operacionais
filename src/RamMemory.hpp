@@ -1,8 +1,9 @@
-#ifndef RAMMEMORY_HPP
-#define RAMMEMORY_HPP
+#ifndef RAM_MEMORY_HPP
+#define RAM_MEMORY_HPP
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 using namespace std;
 
