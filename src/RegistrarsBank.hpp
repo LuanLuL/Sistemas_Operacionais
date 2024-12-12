@@ -1,26 +1,26 @@
-#ifndef REGISTER_BANK_HPP
-#define REGISTER_BANK_HPP
+#ifndef REGISTRARS_BANK_HPP
+#define REGISTRARS_BANK_HPP
 
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-typedef struct Register {
+typedef struct Registrar {
     int value;
     bool dirty;
-} Register;
+} Registrar;
 
-class RegisterBank {
+class RegistrarsBank {
     private:
-        vector<Register> registers;
+        vector<Registrar> registrars;
         int size;
         int Pc = 0;
 
  public:
-    RegisterBank(int size);
-    ~RegisterBank();
-    Register createRegister(int value, bool dirty);
+    RegistrarsBank(int size);
+    ~RegistrarsBank();
+    Registrar createRegistrar(int value, bool dirty);
     int getValue(int address);
     void setValue(int address, int value);
     bool getStatus(int address);

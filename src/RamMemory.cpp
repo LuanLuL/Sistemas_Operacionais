@@ -1,6 +1,6 @@
 #include "RamMemory.hpp"
 
-RamMemory::RamMemory(int size, vector<string> initialProcesses) {
+RamMemory::RamMemory(int size, vector<vector<string>> initialProcesses) {
     if(size <= 0){
         throw invalid_argument("RamMemory::RamMemory(The memory's size must be bigger than 1)");
     }
@@ -31,11 +31,11 @@ int RamMemory::read(int address) {
     return this->memoryCells[address];
 }
 
-string RamMemory::search(int address) {
-    if (address < 0 || address >= this->memoryProcesses.size()) {
+vector<string> RamMemory::search(int addressProcess) {
+    if (addressProcess < 0 || addressProcess >= this->memoryProcesses.size()) {
         throw out_of_range("RamMemory::search(Address is out of range)");
     }
-    return memoryProcesses[address];
+    return this->memoryProcesses[addressProcess];
 }
 
 int RamMemory::getSize() {

@@ -1,8 +1,7 @@
 #include "ControlUnit.hpp"
 
-ControlUnit::ControlUnit(RegisterBank* regBank, RamMemory* ram) {
-    this->bankOfRegister = regBank;
-    this->ram = ram;
+ControlUnit::ControlUnit(RegistrarsBank* regBank) {
+    this->bankOfRegistrars = regBank;
 }
 
 void ControlUnit::executeProcess(const vector<string>&  instructions) {
@@ -11,13 +10,7 @@ void ControlUnit::executeProcess(const vector<string>&  instructions) {
     }
 }
 
-void ControlUnit::ULA(string comand, int firstRegister, int secondRegister, int addressOfResult) {
-    if(this->bankOfRegister->getStatus(firstRegister)){
-        //verifica se esta sujo
-    } else if(this->bankOfRegister->getStatus(secondRegister)){
-        //verifica se esta sujo
-    }
-    
+void ControlUnit::ULA(string comand, int firstRegistrar, int secondRegistrar, int addressOfResult) {
     if (comand == "ADD") {
     // Adicionar ação para o caso ADD
     } else if (comand == "SUB") {

@@ -10,14 +10,14 @@ using namespace std;
 class RamMemory {
     private: 
         int* memoryCells;
-        vector<string> memoryProcesses;
+        vector<vector<string>> memoryProcesses;
         int size;
     public:
-        RamMemory(int size, vector<string> initialProcesses);
+        RamMemory(int size, vector<vector<string>> initialProcesses);
         ~RamMemory();
         void write(int value, int address);
         int read(int address);
-        string search(int address);
+        vector<string> search(int addressProcess);
         int getSize();
 };
 

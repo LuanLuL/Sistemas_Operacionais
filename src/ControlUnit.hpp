@@ -4,19 +4,18 @@
 #include <vector>
 #include <string>
 
-#include "RegisterBank.hpp"
+#include "RegistrarsBank.hpp"
 #include "RamMemory.hpp"
 
 using namespace std;
 
 class ControlUnit {
     private:
-        RegisterBank* bankOfRegister;
-        RamMemory* ram;
+        RegistrarsBank* bankOfRegistrars;
     public:
-        ControlUnit(RegisterBank* regBank, RamMemory* ram);
+        ControlUnit(RegistrarsBank* regBank);
         void executeProcess(const vector<string>&  instructions);
-        void ULA(string comand, int firstRegister, int secondRegister, int addressOfResult);
+        void ULA(string comand, int firstRegistrar, int secondRegistrar, int addressOfResult);
 };
 
 #endif
