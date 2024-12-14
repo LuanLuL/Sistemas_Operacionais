@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include "RegistrarsBank.hpp"
 #include "RamMemory.hpp"
@@ -11,11 +12,16 @@ using namespace std;
 
 class ControlUnit {
     private:
+        int id;
         RegistrarsBank* bankOfRegistrars;
+        int clocks;
+        vector<string> splitLineOfCodeBySpace(string input);
     public:
-        ControlUnit(RegistrarsBank* regBank);
+        ControlUnit(int id, RegistrarsBank* regBank);
+        int getId();
+        int getClocks();
         void executeProcess(const vector<string>&  instructions);
-        void ULA(string comand, int firstRegistrar, int secondRegistrar, int addressOfResult);
+        void ULA(vector<string> code);
 };
 
 #endif

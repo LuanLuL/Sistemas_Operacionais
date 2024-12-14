@@ -6,14 +6,16 @@
 #include <string>
 #include <stdexcept>
 
+#include "ControlUnit.hpp"
+
 using namespace std;
 
 class CentralProcessesUnit {
     private:
-        queue<vector<string>> processQueue;
+        queue<ControlUnit> processQueue;
     public:
-        void addProcess(const vector<string>& process);
-        vector<string> getNextProcess();
+        void addProcess(ControlUnit process);
+        ControlUnit getNextProcess();
         bool hasProcesses();
 };
 

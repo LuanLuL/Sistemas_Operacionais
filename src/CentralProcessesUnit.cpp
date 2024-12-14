@@ -1,14 +1,14 @@
 #include "CentralProcessesUnit.hpp"
 
-void CentralProcessesUnit::addProcess(const vector<string>& process) {
+void CentralProcessesUnit::addProcess(ControlUnit process) {
     this->processQueue.push(process);
 }
 
-vector<string> CentralProcessesUnit::getNextProcess() {
+ControlUnit CentralProcessesUnit::getNextProcess() {
     if (this->processQueue.empty()) {
         throw runtime_error("CentralProcessesUnit::getNextProcess(No processes in the queue)");
     }
-    vector<string> nextProcess = this->processQueue.front();
+    ControlUnit nextProcess = this->processQueue.front();
     this->processQueue.pop();
     return nextProcess;
 }

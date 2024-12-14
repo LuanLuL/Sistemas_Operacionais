@@ -5,9 +5,11 @@
 #include <vector>
 
 #include "RamMemory.hpp"
-#include "RegistrarsBank.hpp"
+#include "CentralProcessesUnit.hpp"
 
-#define AMOUNT_PROCESSES 2
+#define AMOUNT_PROCESSES 1
+#define AMOUNT_REGISTERS_ADDRESS 32
+#define AMOUNT_MEMORY_ADDRESS AMOUNT_PROCESSES*AMOUNT_REGISTERS_ADDRESS
 
 using namespace std;
 
@@ -29,14 +31,20 @@ vector<vector<string>> readDisc() {
     return filesContent;
 }
 
-
 int main() {
     setlocale(LC_CTYPE, "Portuguese");
-    RamMemory ram(AMOUNT_PROCESSES*32, readDisc());
+    RamMemory ram(AMOUNT_MEMORY_ADDRESS, readDisc());
+    CentralProcessesUnit cpu;
+    for(int i = 0; i < AMOUNT_PROCESSES; i++){
+        RegistrarsBank* bank = new RegistrarsBank(AMOUNT_REGISTERS_ADDRESS);
+        ControlUnit process(i, bank);
+        cpu.addProcess(process);
+    }
+    while (cpu.hasProcesses()){
+        ControlUnit currentProcess =  cpu.getNextProcess();
+        currentProcess.ULA(ram.search(currentProcess.getId()));
+    }
     
-    // RegistrarsBank registrars(32);
-    // cout << "\n";
-    // registrars.print();
-    // cout << "\n\n";
+
     return 0;
 }
