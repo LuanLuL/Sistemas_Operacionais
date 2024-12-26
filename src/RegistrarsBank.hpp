@@ -21,6 +21,8 @@ class RegistrarsBank {
     RegistrarsBank(int size);
     ~RegistrarsBank();
     Registrar createRegistrar(int value, bool dirty);
+    vector<Registrar> getRegistrars();
+    int getSize();
     int getValue(int address);
     void setValue(int address, int value);
     bool getStatus(int address);

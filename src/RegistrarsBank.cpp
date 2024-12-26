@@ -19,6 +19,14 @@ Registrar RegistrarsBank::createRegistrar(int value, bool dirty) {
     return reg;
 }
 
+vector<Registrar> RegistrarsBank::getRegistrars() {
+    return this->registrars;
+}
+
+int RegistrarsBank::getSize() {
+    return this->size;
+}
+
 int RegistrarsBank::getValue(int address) {
     if (address < 0 || address >= this->size) {
         throw out_of_range("RegistrarsBank::getValue(Address is out of range)");
@@ -30,7 +38,7 @@ void RegistrarsBank::setValue(int address, int value) {
     if (address < 0 || address >= this->size) {
         throw out_of_range("RegistrarsBank::setValue(Address is out of range)");
     }
-    this->registrars[address].value = value;
+    this->registrars[address] = createRegistrar(value, false);
 }
 
 bool RegistrarsBank::getStatus(int address) {

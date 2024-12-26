@@ -7,16 +7,24 @@
 #include <stdexcept>
 
 #include "ControlUnit.hpp"
+#include "RegistrarsBank.hpp"
+#include "RamMemory.hpp"
 
 using namespace std;
 
 class CentralProcessesUnit {
     private:
-        queue<ControlUnit> processQueue;
+        bool busy;
+        int clocks;
+        ControlUnit controlUnit;
     public:
-        void addProcess(ControlUnit process);
-        ControlUnit getNextProcess();
-        bool hasProcesses();
+        CentralProcessesUnit(int registrarsAmount);
+        int getClocks();
+        void setClocks(int newClocks);
+        bool getBusy();
+        void setBusy(bool newBusy);
+        int execute(MemoryPage *processPage, RamMemory *ram);
+        void swapProgram(MemoryPage *processPage, RamMemory *ram, int typeOfSwap);
 };
 
 #endif

@@ -12,16 +12,13 @@ using namespace std;
 
 class ControlUnit {
     private:
-        int id;
-        RegistrarsBank* bankOfRegistrars;
-        int clocks;
+        RegistrarsBank bankOfRegistrars;
         vector<string> splitLineOfCodeBySpace(string input);
     public:
-        ControlUnit(int id, RegistrarsBank* regBank);
-        int getId();
-        int getClocks();
+        ControlUnit(int registrarsAmount);
+        RegistrarsBank* getBankOfRegistrars();
         void executeProcess(const vector<string>&  instructions);
-        void ULA(vector<string> code);
+        void ULA(MemoryPage *processBlock, RamMemory *ram);
 };
 
 #endif

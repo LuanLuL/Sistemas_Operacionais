@@ -4,21 +4,40 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <queue>
+#include <stdexcept>
 
 using namespace std;
 
+typedef struct MemoryPage {
+    int id;
+    int processCount;
+    vector<string> process;
+} MemoryPage;
+
+typedef struct MemoryCell {
+    int idProcess;
+    int registrarAddress;
+    int registrarValue;
+    int ramAddress;
+} MemoryCell;
+
 class RamMemory {
     private: 
-        int* memoryCells;
-        vector<vector<string>> memoryProcesses;
+        vector<MemoryCell> memoryCells;
+        queue<MemoryPage> processQueue;
         int size;
     public:
-        RamMemory(int size, vector<vector<string>> initialProcesses);
+        RamMemory(int size);
         ~RamMemory();
-        void write(int value, int address);
-        int read(int address);
-        vector<string> search(int addressProcess);
+        vector<MemoryCell> getMemoryCells();
+        MemoryCell createMemoryCell(int newIdProcess, int newRegistrarAddress, int newRegistrarValue, int newRamAddress);
+        void write(MemoryCell newMemoryCell, int kindOfWrite);
+        MemoryCell read(int address);
         int getSize();
+        void addProcess(MemoryPage process);
+        MemoryPage getNextProcess();
+        bool hasProcesses();
 };
 
 #endif
