@@ -38,6 +38,7 @@ class RamMemory {
         void addProcess(MemoryPage process);
         MemoryPage getNextProcess();
         bool hasProcesses();
+        int getNumberOfProcesses();
 };
 
 #endif

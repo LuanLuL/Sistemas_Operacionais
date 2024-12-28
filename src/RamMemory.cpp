@@ -90,3 +90,7 @@ MemoryPage RamMemory::getNextProcess() {
 bool RamMemory::hasProcesses() {
     return !this->processQueue.empty();
 }
+
+int RamMemory::getNumberOfProcesses() {
+    return this->processQueue.size();
+}

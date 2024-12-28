@@ -17,7 +17,6 @@ class ControlUnit {
     public:
         ControlUnit(int registrarsAmount);
         RegistrarsBank* getBankOfRegistrars();
-        void executeProcess(const vector<string>&  instructions);
         void ULA(MemoryPage *processBlock, RamMemory *ram);
 };
 

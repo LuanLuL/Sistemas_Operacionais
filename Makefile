@@ -1,6 +1,6 @@
 CXX      := -g++
 #CXXFLAGS := -g -Wall -fsanitize=address,undefined
-LDFLAGS  := -lstdc++ -lm
+LDFLAGS  := -pthread -lstdc++ -lm
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/

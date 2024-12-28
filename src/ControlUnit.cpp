@@ -7,14 +7,7 @@ RegistrarsBank* ControlUnit::getBankOfRegistrars() {
     return &this->bankOfRegistrars;
 }
 
-void ControlUnit::executeProcess(const vector<string>&  instructions) {
-    for (string lineCode : instructions) {
-        cout << lineCode << endl;
-    }
-}
-
 void ControlUnit::ULA(MemoryPage *processBlock, RamMemory *ram) {
-    cout << "Código " << processBlock->id << ": " << processBlock->process[this->bankOfRegistrars.getPc()-1] << endl;
     vector<string> comands = splitLineOfCodeBySpace(processBlock->process[this->bankOfRegistrars.getPc()-1]);
     if (comands[0] == "LOAD") {
         this->bankOfRegistrars.setValue(stoi(comands[2]), stoi(comands[1]));
