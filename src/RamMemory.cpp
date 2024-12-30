@@ -28,7 +28,7 @@ MemoryCell RamMemory::createMemoryCell(int newIdProcess, int newRegistrarAddress
     return newMemoryCell;
 }
 
-void RamMemory::write(MemoryCell newMemoryCell, int kindOfWrite) { // A variável "(this->memoryCells[newMemoryCell.ramAddress].idProcess == 0)" implica que a celular de memória está vazia
+void RamMemory::write(MemoryCell newMemoryCell, int kindOfWrite) { // A variável "(this->memoryCells[newMemoryCell.ramAddress].idProcess == 0)" implica que a celula de memória está vazia
     if (newMemoryCell.ramAddress < -1 || newMemoryCell.ramAddress >= this->size) { // O valor "newRamAddress == -1" implica que será armazenado em um local desconhecido na memória Ram
         throw out_of_range("RamMemory::write(Address is out of range)");
     }
@@ -68,6 +68,13 @@ MemoryCell RamMemory::read(int address) {
         throw out_of_range("RamMemory::read(Address is out of range)");
     }
     return this->memoryCells[address];
+}
+
+void RamMemory::clear(int address) {
+    if (address < 0 || address >= size) {
+        throw out_of_range("RamMemory::clear(Address is out of range)");
+    }
+    this->memoryCells[address] = createMemoryCell(0, 0, 0, 0);
 }
 
 int RamMemory::getSize() {

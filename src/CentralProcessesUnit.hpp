@@ -10,6 +10,8 @@
 #include "RegistrarsBank.hpp"
 #include "RamMemory.hpp"
 
+#define TIME_QUANTUM 35 // TIME_QUANTUM = 35 CLOCKS
+
 using namespace std;
 
 class CentralProcessesUnit {

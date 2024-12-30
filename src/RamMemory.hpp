@@ -34,6 +34,7 @@ class RamMemory {
         MemoryCell createMemoryCell(int newIdProcess, int newRegistrarAddress, int newRegistrarValue, int newRamAddress);
         void write(MemoryCell newMemoryCell, int kindOfWrite);
         MemoryCell read(int address);
+        void clear(int address);
         int getSize();
         void addProcess(MemoryPage process);
         MemoryPage getNextProcess();

@@ -22,7 +22,7 @@ int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram) {
     int timeQuantum = 0;
     this->swapProgram(processPage, ram, 2);
     while(this->controlUnit.getBankOfRegistrars()->getPc() <= processPage->process.size()){
-        if(timeQuantum == 3){
+        if(timeQuantum == TIME_QUANTUM){
             this->swapProgram(processPage, ram, 1);
             return -1;
         }
@@ -55,7 +55,7 @@ void CentralProcessesUnit::swapProgram(MemoryPage *processPage, RamMemory *ram, 
             processPage->processCount = oldBank->getPc();
             for(int i = 0; i < oldBank->getSize(); i++){ //salva todos os registradores relacioandos com o processo antigo na memória Ram
                 Registrar pastRegistrar = (*oldBank).getRegistrars()[i];
-                if(pastRegistrar.dirty){ // sujo implica que estava sendo usado no processo antigo
+                if(pastRegistrar.dirty || pastRegistrar.value != 0){ // sujo implica que estava sendo usado no processo antigo
                     ram->write(ram->createMemoryCell(processPage->id, i, pastRegistrar.value, -1), 2);
                     oldBank->setClean(i); // feito o swap o resgistrador tem o status de limpo
                 }
@@ -68,6 +68,7 @@ void CentralProcessesUnit::swapProgram(MemoryPage *processPage, RamMemory *ram, 
             for(int i = 0; i < ram->getSize(); i++){ //busca os valores do novo processo na ram e passa para os registradores
                 if(pastMemoryBank[i].idProcess == processPage->id){
                     oldBank->setValue(pastMemoryBank[i].registrarAddress, pastMemoryBank[i].registrarValue);
+                    ram->clear(i);
                 }
             }
             break;
