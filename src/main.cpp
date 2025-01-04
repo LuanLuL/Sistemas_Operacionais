@@ -10,6 +10,7 @@
 
 #include "RamMemory.hpp"
 #include "CentralProcessesUnit.hpp"
+#include "InputsOutputs.hpp"
 
 #define AMOUNT_PROCESSES 6
 #define AMOUNT_REGISTERS_ADDRESS 32
@@ -23,8 +24,8 @@ atomic<int> processesExecuted(0);
 mutex mtx;
 
 void readDisc(RamMemory &ram);
-void monitorProcesses(CentralProcessesUnit *CPU, RamMemory *RAM);
-void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram);
+void monitorProcesses(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs);
+void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram, InputsOutputs *io);
 
 int main() {
     auto inicio = std::chrono::high_resolution_clock::now();
@@ -32,10 +33,11 @@ int main() {
     RamMemory ram(AMOUNT_MEMORY_ADDRESS); // inicia memória RAM
     readDisc(ram); // carrega processos do disco para a memória RAM
     CentralProcessesUnit cpu(AMOUNT_REGISTERS_ADDRESS); // inicia a CPU
+    InputsOutputs inOut;
     cout << "\n\n-------------------------------------------------------------------------------\n";
     cout << "\tIniciando execução:";
-    cout << "\n-------------------------------------------------------------------------------\n";
-    thread monitorThread(monitorProcesses, &cpu, &ram);
+    cout << "\n-------------------------------------------------------------------------------";
+    thread monitorThread(monitorProcesses, &cpu, &ram, &inOut);
     if (monitorThread.joinable()) {
         monitorThread.join();
     }
@@ -51,12 +53,14 @@ void readDisc(RamMemory &ram) {
         string filename = "./data/codigo" + to_string(i) + ".txt";
         ifstream file(filename);
         if (file.is_open()) {
+            MemoryPage page;
             vector<string> fileLines;
             string line;
+            getline(file, line);
+            page.inputOutput = line;
             while (getline(file, line)) {
                 fileLines.push_back(line);
             }
-            MemoryPage page;
             page.id = i;
             page.processCount = 1;
             page.process = fileLines;
@@ -68,20 +72,28 @@ void readDisc(RamMemory &ram) {
     }
 }
 
-void monitorProcesses(CentralProcessesUnit *CPU, RamMemory *RAM) { // monitora a CPU
+void monitorProcesses(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs) { // monitora a CPU
     vector<thread> threads; // gaveta de Threads
     while (processesExecuted < AMOUNT_PROCESSES) {
-        cout << "\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
+        cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
         while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
             MemoryPage currentProcess = RAM->getNextProcess();
-            threads.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM));
+            if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
+                cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
+                RAM->addProcess(currentProcess);
+                break;
+            }else{
+                inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
+                threads.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs));
+            }
+            
         }
         for (auto& th : threads) {
             if (th.joinable()) {
                 th.join();
             }
         }
-        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milessegundo
+        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milissegundo
     }
     cout << "\n\n-------------------------------------------------------------------------------\n";
     cout << "\tEncerrando execução de processos";
@@ -89,15 +101,19 @@ void monitorProcesses(CentralProcessesUnit *CPU, RamMemory *RAM) { // monitora a
 
 }
 
-void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram) {
+void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram, InputsOutputs *io) {
     lock_guard<mutex> lock(mtx); // Bloqueia o mutex durante a execução do processo
-    cout << "\n\tIniciando execução do processo " << processPage.id;
+    cout << "\n\tIniciando execução do processo " << processPage.id << " que usa o " << processPage.inputOutput << ".";
     int result = cpu->execute(&processPage, ram);
     if (result == -1) { // caso o processo não termine retorna ele para a fila
         ram->addProcess(processPage);
-        cout << "\n\tAcabou o tempo quantum do Processo " << processPage.id << ", retornando para a fila.\n";
+        cout << "\n\tAcabou o tempo quantum do Processo " << processPage.id << ", retornando para a fila.";
+        cout << "\n\tLiberando o " << processPage.inputOutput << ".";
+        io->setUnoccupied(processPage.inputOutput);
     } else {
-        cout << "\n\tProcesso " << processPage.id << " terminou a execução.\n";
+        cout << "\n\tProcesso " << processPage.id << " terminou a execução.";
+        cout << "\n\tLiberando o " << processPage.inputOutput << ".";
+        io->setUnoccupied(processPage.inputOutput);
         processesExecuted++;
     }
 }

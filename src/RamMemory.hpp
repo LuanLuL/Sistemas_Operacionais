@@ -13,6 +13,7 @@ typedef struct MemoryPage {
     int id;
     int processCount;
     vector<string> process;
+    string inputOutput;
 } MemoryPage;
 
 typedef struct MemoryCell {

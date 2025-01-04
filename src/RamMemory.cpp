@@ -52,7 +52,7 @@ void RamMemory::write(MemoryCell newMemoryCell, int kindOfWrite) { // A variáve
                 }
             }
             if(!spaceFound){ // se nao encontrar um espaço de memória livre implica em tela azul, porque a memória está superlotada
-                throw runtime_error("RamMemory::write(MEMORY_MANAGEMENT -> alto consumo de memória RAM)");
+                throw runtime_error("RamMemory::write(MEMORY_MANAGEMENT -> RAM memory's already been totaly occupied )");
             } 
             break;
         }
