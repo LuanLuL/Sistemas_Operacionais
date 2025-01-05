@@ -23,6 +23,7 @@
         <img src="img/Esquema_SO.png">
         <br><br><strong>Figura 1:</strong> Desenho sobre o Simulador da Arquitetura de Von Neumann e Pipeline MIPS
     </p>
+    <br>
     <p>
         O simulador segue um fluxo básico de execução de instruções, semelhante ao ciclo de instruções de um processador com pipeline, com as fases de busca (fetch), decodificação (decode), execução (execute), acesso à memória (memory access), e escrita de volta (write back).
     </p>
@@ -145,7 +146,7 @@
                 <strong>Formato</strong>: IF &lt;operation&gt; &lt;src1&gt; &lt;src2&gt; &lt;dest&gt;
             </li>
             <li>
-                <strong>Descrição</strong>: Executa uma comparação entre os valores dos registradores &lt;src1&gt; e &lt;src2&gt;, com base na operação &lt;operation&gt; (&lt; ou &gt;). O resultado da comparação ( 6666 para verdadeiro, -6666 para falso) é armazenado no registrador &lt;dest&gt;.
+                <strong>Descrição</strong>: Executa uma comparação entre os valores dos registradores &lt;src1&gt; e &lt;src2&gt;, com base na operação &lt;operation&gt; (&lt; ou &gt;). O resultado da comparação (6666 para verdadeiro, -6666 para falso) é armazenado no registrador &lt;dest&gt;.
             </li>
             <li>
                 <strong>Exemplo</strong>: IF &gt; 10 20 30 ➡ Compara se o valor no registrador 10 é maior que o valor no registrador 20. O resultado (6666 ou -6666) será armazenado no registrador 30.
@@ -221,7 +222,7 @@
 <section>
     <h2>📚 Referências</h2>
     <p>
-        BERTINI, Luciano. <strong>Capítulo 5 Pipeline</strong>. 2019. Disponível em: <a href="https://www.professores.uff.br/lbertini/wp-content/uploads/sites/108/2017/08/Cap-5-Pipeline.pdf">https://www.professores.uff.br/lbertini/wp-content/uploads/sites/108/2017/08/Cap-5-Pipeline.pdf</a>. Acesso em: 24 out. 2024.
+        BERTINI, Luciano. <strong>Capítulo 5 Pipeline</strong>. 2019. Disponível em: <a href="https://www.professores.uff.br/lbertini/wp-content/uploads/sites/108/2017/08/Cap-5-Pipeline.pdf">https://www.professores.uff.br/lbertini/wp-content/uploads/sites/108/2017/08/Cap-5-Pipeline.pdf</a>. Acesso em: 4 jan. 2025.
     </p>
 </section>
 
