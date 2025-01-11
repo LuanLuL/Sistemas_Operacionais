@@ -12,6 +12,7 @@ using namespace std;
 typedef struct MemoryPage {
     int id;
     int processCount;
+    int numberClocksEstimated;
     vector<string> process;
     string inputOutput;
 } MemoryPage;
@@ -39,6 +40,7 @@ class RamMemory {
         int getSize();
         void addProcess(MemoryPage process);
         MemoryPage getNextProcess();
+        MemoryPage getProcessWithLeastClocks();
         bool hasProcesses();
         int getNumberOfProcesses();
 };

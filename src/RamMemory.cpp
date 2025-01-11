@@ -94,6 +94,38 @@ MemoryPage RamMemory::getNextProcess() {
     return nextProcess;
 }
 
+MemoryPage RamMemory::getProcessWithLeastClocks() {
+    if (this->processQueue.empty()) {
+        throw runtime_error("RamMemory::getProcessWithLeastClocks(No processes in the queue)");
+    }
+    queue<MemoryPage> tempQueue;
+    MemoryPage minProcess = this->processQueue.front();
+    this->processQueue.pop();
+    tempQueue.push(minProcess);
+    while (!this->processQueue.empty()) {
+        MemoryPage current = this->processQueue.front();
+        this->processQueue.pop();
+        if (current.numberClocksEstimated < minProcess.numberClocksEstimated) {
+            minProcess = current;
+        }
+        tempQueue.push(current);
+    }
+    queue<MemoryPage> newQueue;
+    bool removed = false;
+    while (!tempQueue.empty()) {
+        MemoryPage current = tempQueue.front();
+        tempQueue.pop();
+        if (!removed && current.id == minProcess.id && 
+            current.numberClocksEstimated == minProcess.numberClocksEstimated) {
+            removed = true;
+            continue;
+        }
+        newQueue.push(current);
+    }
+    this->processQueue = newQueue;
+    return minProcess;
+}
+
 bool RamMemory::hasProcesses() {
     return !this->processQueue.empty();
 }
