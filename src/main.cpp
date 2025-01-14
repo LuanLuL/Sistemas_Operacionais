@@ -26,6 +26,7 @@ mutex mtx;
 void readDisc(RamMemory &ram);
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs);
 void shortestJobFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs);
+void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs);
 void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram, InputsOutputs *io);
 
 int main() {
@@ -38,7 +39,7 @@ int main() {
     cout << "\nEscolha algum método de escalonamento: \n\n";
     cout << "1 - First Job First Service (FIFO)\n";
     cout << "2 - Shortest Job First (SJF)\n";
-    cout << "3 - Lottery\n";
+    cout << "3 - Highest Priority First (HPF)\n";
     cout << "4 - Sair\n";
     cout << "\nDigite sua opção: ";
     cin >> option;
@@ -73,11 +74,13 @@ int main() {
         }
         case 3: {
             cout << "\n-------------------------------------------------------------------------------\n";
-            cout << "\tIniciando execução por Lottery: ";
+            cout << "\tIniciando execução por Highest Priority First (HPF): ";
             cout << "\n-------------------------------------------------------------------------------";
             auto inicio = std::chrono::high_resolution_clock::now();
-    
-
+            thread monitorThread(highestPriorityFirst, &cpu, &ram, &inOut);
+            if (monitorThread.joinable()) {
+                monitorThread.join();
+            }
             auto fim = std::chrono::high_resolution_clock::now();
             auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
             cout << "\n\nTempo de execução por Lottery: " << duracao.count() << " ms\n\n";
@@ -98,9 +101,17 @@ void readDisc(RamMemory &ram) {
             vector<string> fileLines;
             int numberClocksEstimated = 0;
             string line;
-            getline(file, line);
-            page.inputOutput = line;
-            while (getline(file, line)) {
+            if (getline(file, line)) { // Ler a primeira linha
+                istringstream iss(line);
+                string inputOutputStr, priorityStr;
+                if (!getline(iss, inputOutputStr, ';') || !getline(iss, priorityStr, ';')) { // separa linha pelo ';'
+                    cerr << "Erro ao processar a primeira linha do arquivo: " << filename << endl;
+                    continue; // Pula para o próximo arquivo
+                }
+                page.inputOutput = inputOutputStr; // armazena variável de controle no processo
+                page.priority = stoi(priorityStr); // armazena variável de controle no processo
+            }
+            while (getline(file, line)) {  // Ler as demais linhas
                 fileLines.push_back(line);
                 istringstream iss(line);
                 vector<string> words;
@@ -127,7 +138,7 @@ void readDisc(RamMemory &ram) {
 }
 
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs) { // monitora a CPU
-    vector<thread> threads; // gaveta de Threads
+    vector<thread> nucleos; // gaveta de núcleos
     while (processesExecuted < AMOUNT_PROCESSES) {
         cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
         while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
@@ -138,11 +149,10 @@ void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutp
                 break;
             }else{
                 inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
-                threads.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs));
+                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs));
             }
-            
         }
-        for (auto& th : threads) {
+        for (auto& th : nucleos) {
             if (th.joinable()) {
                 th.join();
             }
@@ -155,22 +165,48 @@ void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutp
 }
 
 void shortestJobFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs) {
-vector<thread> threads; // gaveta de Threads
+    vector<thread> nucleos; // gaveta de núcleos
     while (processesExecuted < AMOUNT_PROCESSES) {
         cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
         while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
-            MemoryPage currentProcess = RAM->getNextProcess(); // seleciona o menor processo
+            MemoryPage currentProcess = RAM->getProcessWithLeastClocks(); // seleciona o menor processo
             if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
                 cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
                 RAM->addProcess(currentProcess);
                 break;
             }else{
                 inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
-                threads.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs));
-            }
-            
+                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs));
+            } 
         }
-        for (auto& th : threads) {
+        for (auto& th : nucleos) {
+            if (th.joinable()) {
+                th.join();
+            }
+        }
+        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milissegundo
+    }
+    cout << "\n\n-------------------------------------------------------------------------------\n";
+    cout << "\tEncerrando execução de processos";
+    cout << "\n-------------------------------------------------------------------------------";
+}
+
+void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs) {
+    vector<thread> nucleos; // gaveta de núcleos
+    while (processesExecuted < AMOUNT_PROCESSES) {
+        cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
+        while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
+            MemoryPage currentProcess = RAM->getProcessByPriority(); // sorteia processo por loteria
+            if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
+                cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
+                RAM->addProcess(currentProcess);
+                break;
+            }else{
+                inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
+                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs));
+            }
+        }
+        for (auto& th : nucleos) {
             if (th.joinable()) {
                 th.join();
             }

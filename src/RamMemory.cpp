@@ -115,8 +115,7 @@ MemoryPage RamMemory::getProcessWithLeastClocks() {
     while (!tempQueue.empty()) {
         MemoryPage current = tempQueue.front();
         tempQueue.pop();
-        if (!removed && current.id == minProcess.id && 
-            current.numberClocksEstimated == minProcess.numberClocksEstimated) {
+        if (!removed && current.id == minProcess.id && current.numberClocksEstimated == minProcess.numberClocksEstimated) {
             removed = true;
             continue;
         }
@@ -124,6 +123,38 @@ MemoryPage RamMemory::getProcessWithLeastClocks() {
     }
     this->processQueue = newQueue;
     return minProcess;
+}
+
+MemoryPage RamMemory::getProcessByPriority() {
+    if (this->processQueue.empty()) {
+        throw runtime_error("RamMemory::getProcessByPriority(No processes in the queue)");
+    }
+    queue<MemoryPage> tempQueue;
+    MemoryPage maxProcessPriority = this->processQueue.front();
+    this->processQueue.pop();
+    tempQueue.push(maxProcessPriority);
+    while (!this->processQueue.empty()) {
+        MemoryPage current = this->processQueue.front();
+        this->processQueue.pop();
+        if (current.priority > maxProcessPriority.priority) {
+            maxProcessPriority = current;
+        }
+        tempQueue.push(current);
+    }
+    queue<MemoryPage> newQueue;
+    bool removed = false;
+    while (!tempQueue.empty()) {
+        MemoryPage current = tempQueue.front();
+        tempQueue.pop();
+        if (!removed && current.id == maxProcessPriority.id && 
+            current.priority == maxProcessPriority.priority) {
+            removed = true;
+            continue;
+        }
+        newQueue.push(current);
+    }
+    this->processQueue = newQueue;
+    return maxProcessPriority;
 }
 
 bool RamMemory::hasProcesses() {

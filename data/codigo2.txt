@@ -1,4 +1,4 @@
-Monitor
+Monitor;2
 FOR ADD 50 25 2
 FOR SUB 50 77 12
 IF > 2 12 24

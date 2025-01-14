@@ -6,6 +6,7 @@
 #include <string>
 #include <queue>
 #include <stdexcept>
+#include <random>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ typedef struct MemoryPage {
     int id;
     int processCount;
     int numberClocksEstimated;
+    int priority;
     vector<string> process;
     string inputOutput;
 } MemoryPage;
@@ -41,6 +43,7 @@ class RamMemory {
         void addProcess(MemoryPage process);
         MemoryPage getNextProcess();
         MemoryPage getProcessWithLeastClocks();
+        MemoryPage getProcessByPriority();
         bool hasProcesses();
         int getNumberOfProcesses();
 };

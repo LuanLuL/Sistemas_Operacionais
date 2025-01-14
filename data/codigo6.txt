@@ -1,4 +1,4 @@
-Monitor
+Monitor;2
 FOR ADD 66 244 27
 FOR SUB 77 123 22
 IF > 27 22 4

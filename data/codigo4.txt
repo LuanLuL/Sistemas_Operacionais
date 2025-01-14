@@ -1,4 +1,4 @@
-Monitor
+Monitor;5
 FOR ADD 192 3 3
 FOR SUB 253 7 21
 IF > 3 21 11

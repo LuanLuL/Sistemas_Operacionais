@@ -1,4 +1,4 @@
-Fone de Ouvido
+Fone de Ouvido;3
 LOAD 5 2
 LOAD 2 6
 ADD 2 6 3
