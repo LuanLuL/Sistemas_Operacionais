@@ -18,11 +18,11 @@ void CentralProcessesUnit::setBusy(bool newBusy) {
     this->busy = newBusy;
 }
 
-int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram) {
+int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram, bool isPreempitivo) {
     int timeQuantum = 0;
     this->swapProgram(processPage, ram, 2);
     while(this->controlUnit.getBankOfRegistrars()->getPc() <= processPage->process.size()){
-        if(timeQuantum == TIME_QUANTUM){
+        if(timeQuantum == TIME_QUANTUM && isPreempitivo){
             this->swapProgram(processPage, ram, 1);
             return -1;
         }

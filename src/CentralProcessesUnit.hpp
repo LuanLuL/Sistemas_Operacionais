@@ -25,7 +25,7 @@ class CentralProcessesUnit {
         void setClocks(int newClocks);
         bool getBusy();
         void setBusy(bool newBusy);
-        int execute(MemoryPage *processPage, RamMemory *ram);
+        int execute(MemoryPage *processPage, RamMemory *ram, bool isPreempitivo);
         void swapProgram(MemoryPage *processPage, RamMemory *ram, int typeOfSwap);
 };
 
