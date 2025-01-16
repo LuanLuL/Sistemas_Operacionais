@@ -73,7 +73,7 @@ int main() {
             }
             auto fim = std::chrono::high_resolution_clock::now();
             auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
-            cout << "\n\nTempo de execução por First Job First Service (FIFO)" << (preemptivo ? " preemptivo: " : "não preemptvo: ") << duracao.count() << " ms\n\n";
+            cout << "\n\nTempo de execução por First Job First Service (FIFO)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
             break;
         }
         case 2: {
@@ -87,7 +87,7 @@ int main() {
             }
             auto fim = std::chrono::high_resolution_clock::now();
             auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
-            cout << "\n\nTempo de execução por Shortest Job First (SJF)" << (preemptivo ? " preemptivo: " : "não preemptvo: ") << duracao.count() << " ms\n\n";
+            cout << "\n\nTempo de execução por Shortest Job First (SJF)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
             break;
         }
         case 3: {
