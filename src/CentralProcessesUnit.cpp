@@ -28,6 +28,7 @@ int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram, bool 
         }
         controlUnit.ULA(processPage, ram);
         this->clocks++;
+        processPage->numberClocksEstimated--; // dimnui um de clock estimado a cada execução
         timeQuantum++;
     }
     this->swapProgram(processPage, ram, 0);
