@@ -4,24 +4,27 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <random>
-#include <functional>
+#include <climits>
 
 using namespace std;
 
+typedef struct CacheCell {
+    string instruction;
+    int result;
+    int amountTimesUsed = 0;
+} CacheCell;
+
+
 class Cache {
     private:
-        vector<string> cache; // Armazena as instruções
+        vector<CacheCell> cache; // Armazena as instruções
         int capacity; // Capacidade máxima da cache
-        bool isSimilar(const string& a, const string& b);
         int findReplaceIndex();
     public:
         Cache(int capacity);
-        void save(const string& instruction);
-        bool containsSimilar(const string& instruction);
+        void save(string instruction, int result);
         void displayCache();
-
+        int* isSimilar(string comand);
 };
 
 #endif

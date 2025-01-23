@@ -1,50 +1,48 @@
 #include "Cache.hpp"
 
-Cache::Cache(int capacity) : capacity(capacity) {
-    cache.resize(capacity, "");
+Cache::Cache(int capacity) {
+    this->capacity = capacity;
 }
 
-bool Cache::isSimilar(const string& a, const string& b) {
-    // Simplesmente compara o tamanho das strings ou similaridade por hash
-    if (a.empty() || b.empty()) return false;
-    return a.substr(0, 3) == b.substr(0, 3); // Exemplo simples de similaridade
+int* Cache::isSimilar(string comand) {
+    for(int i=0; i < this->cache.size(); i++){
+        if(this->cache[i].instruction == comand){ // Simplesmente compara se existe alguma instrução similar
+            this->cache[i].amountTimesUsed++;
+            return &this->cache[i].result;
+        }
+    }
+    return NULL;
 }
 
 int Cache::findReplaceIndex() {
-    random_device seeder;
-    const auto seed(seeder.entropy() ? seeder() : time(nullptr));
-    mt19937 randomEngine{static_cast<mt19937::result_type>(seed)};
-    uniform_int_distribution<int> uniformDistribution{0, this->capacity-1};
-    auto generator{bind(uniformDistribution, randomEngine)};
-    vector<int> values(1);
-    generate(begin(values), end(values), generator);
-    cout << "\n\n" << values[0] << " " << values[1] << "\n\n";
-    return values[0];
-}
-
-void Cache::save(const string& instruction) {
-    for (size_t i = 0; i < cache.size(); ++i) {
-        if (cache[i].empty()) { // Se há espaço vazio na cache
-            cache[i] = instruction; // Salva instrução
-            return;
+    int theLeastUsed = INT_MAX;
+    for(int i=0;i<this->cache.size();i++){
+        if(cache[i].amountTimesUsed < theLeastUsed){
+            theLeastUsed = i;
         }
     }
-    
-    cache[findReplaceIndex()] = instruction; // caso não tenha espaços vazios -> sobrescreve
+    return theLeastUsed;
 }
 
-bool Cache::containsSimilar(const string& instruction) {
-    for (const auto& item : cache) {
-        if (isSimilar(instruction, item)) {
-            return true;
-        }
-    }
-    return false;
+void Cache::save(string instructionCode, int resultCode) {
+    CacheCell newCell; // cria nova célula no padrão da Mémoria Cache
+    newCell.instruction = instructionCode;
+    newCell.result = resultCode;
+    if(this->cache.size() < this->capacity){ // se a cache não estiver cheia
+        this->cache.push_back(newCell); // salva normalmente
+        return;
+    } // caso contrario subescreve
+    cache[findReplaceIndex()] = newCell;
 }
 
 void Cache::displayCache() {
-    cout << "Conteúdo da cache:\n";
-    for (const auto& item : cache) {
-        cout << (item.empty() ? "[Vazio]" : item) << "\n";
+    if(this->cache.size() == 0){
+        cout << "\n\nMemória cache esta vazia!\n\n";
+        return;
     }
+    cout << "\n\nConteúdo da memória cache:\n\n";
+    for (CacheCell item : cache) {
+        cout << "["<< item.instruction << ", " << item.result <<  ", " << item.amountTimesUsed << "]\n";
+    }
+    cout << endl;
 }

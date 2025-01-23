@@ -35,9 +35,16 @@ void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, R
 int main() {
     setlocale(LC_CTYPE, "Portuguese");
     Cache cache(AMOUNT_CASHE_ADDRESS);
-    cache.findReplaceIndex();
-    cache.findReplaceIndex();
-    cache.findReplaceIndex();
+    cache.displayCache();
+    cache.save("LOAD 100 12", 100);
+    cache.save("FOR SUB 4320 77 12", 332640);
+    cache.save("IF > 3 21 11", 6666);
+    cache.save("FOR SUB 50 25 2", 1250);
+    cache.displayCache();
+    cache.isSimilar("FOR SUB 50 25 2");
+    cache.isSimilar("FOR SUB 50 25 2");
+    cache.displayCache();
+
     // RamMemory ram(AMOUNT_MEMORY_ADDRESS); // inicia memória RAM
     // readDisc(ram); // carrega processos do disco para a memória RAM
     // CentralProcessesUnit cpu(AMOUNT_REGISTERS_ADDRESS); // inicia a CPU
