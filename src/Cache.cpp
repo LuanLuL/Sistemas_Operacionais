@@ -28,11 +28,19 @@ void Cache::save(string instructionCode, int resultCode) {
     CacheCell newCell; // cria nova célula no padrão da Mémoria Cache
     newCell.instruction = instructionCode;
     newCell.result = resultCode;
+    cout << "\n\n\tinseriu na cashe: ["<< newCell.instruction << ", " << newCell.result <<  ", " << newCell.amountTimesUsed << "]\n\n";
     if(this->cache.size() < this->capacity){ // se a cache não estiver cheia
         this->cache.push_back(newCell); // salva normalmente
         return;
     } // caso contrario subescreve
     cache[findReplaceIndex()] = newCell;
+}
+
+CacheCell Cache::getCacheCell(int address) {
+     if (address < 0 || address >= this->cache.size()) {
+        throw out_of_range("Cache::getCacheCell(Address is out of range)");
+    }
+    return this->cache[address];
 }
 
 void Cache::displayCache() {

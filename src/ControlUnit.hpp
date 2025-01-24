@@ -7,6 +7,7 @@
 
 #include "RegistrarsBank.hpp"
 #include "RamMemory.hpp"
+#include "Cache.hpp"
 
 using namespace std;
 
@@ -17,7 +18,8 @@ class ControlUnit {
     public:
         ControlUnit(int registrarsAmount);
         RegistrarsBank* getBankOfRegistrars();
-        void ULA(MemoryPage *processBlock, RamMemory *ram);
+        void ULA(MemoryPage *processBlock, RamMemory *ram, Cache *cache);
+        void cacheHIT(MemoryPage *processBlock, Cache *cache, int address);
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include "ControlUnit.hpp"
 #include "RegistrarsBank.hpp"
 #include "RamMemory.hpp"
+#include "Cache.hpp"
 
 #define TIME_QUANTUM 35 // TIME_QUANTUM = 35 CLOCKS
 
@@ -25,7 +26,7 @@ class CentralProcessesUnit {
         void setClocks(int newClocks);
         bool getBusy();
         void setBusy(bool newBusy);
-        int execute(MemoryPage *processPage, RamMemory *ram, bool isPreempitivo);
+        int execute(MemoryPage *processPage, RamMemory *ram, Cache *cache, bool isPreempitivo);
         void swapProgram(MemoryPage *processPage, RamMemory *ram, int typeOfSwap);
 };
 

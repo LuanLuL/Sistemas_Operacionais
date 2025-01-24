@@ -18,7 +18,7 @@ void CentralProcessesUnit::setBusy(bool newBusy) {
     this->busy = newBusy;
 }
 
-int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram, bool isPreempitivo) {
+int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram, Cache *cache, bool isPreempitivo) {
     int timeQuantum = 0;
     this->swapProgram(processPage, ram, 2);
     while(this->controlUnit.getBankOfRegistrars()->getPc() <= processPage->process.size()){
@@ -26,10 +26,16 @@ int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram, bool 
             this->swapProgram(processPage, ram, 1);
             return -1;
         }
-        controlUnit.ULA(processPage, ram);
+        int* isPorcessSimilar = cache->isSimilar(processPage->process[this->controlUnit.getBankOfRegistrars()->getPc()-1]);
+        if(isPorcessSimilar != NULL){
+            this->controlUnit.cacheHIT(processPage, cache, (*isPorcessSimilar));
+        } else{
+            controlUnit.ULA(processPage, ram, cache);
+            processPage->numberClocksEstimated--; // dimnui um de clock estimado a cada execução
+        }
         this->clocks++;
-        processPage->numberClocksEstimated--; // dimnui um de clock estimado a cada execução
         timeQuantum++;
+        
     }
     this->swapProgram(processPage, ram, 0);
     return 0;

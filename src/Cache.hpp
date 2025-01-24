@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <climits>
+#include <stdexcept>
 
 using namespace std;
 
@@ -14,7 +15,6 @@ typedef struct CacheCell {
     int amountTimesUsed = 0;
 } CacheCell;
 
-
 class Cache {
     private:
         vector<CacheCell> cache; // Armazena as instruções
@@ -23,6 +23,7 @@ class Cache {
     public:
         Cache(int capacity);
         void save(string instruction, int result);
+        CacheCell getCacheCell(int address);
         void displayCache();
         int* isSimilar(string comand);
 };
