@@ -81,38 +81,36 @@ void ControlUnit::ULA(MemoryPage *processBlock, RamMemory *ram, Cache *cache) {
     // IF operation(< ou >) register_one register_two register_result
     // FOR operation(SUB ou ADD) amount_times value register_result
 
-    this->bankOfRegistrars.setPc(this->bankOfRegistrars.getPc() + 1);
-    
+    this->bankOfRegistrars.setPc(this->bankOfRegistrars.getPc() + 1); 
 }
 
-void ControlUnit::cacheHIT(MemoryPage *processBlock, Cache *cache, int address) {
-    cout << "\n\n\tcomando: " << processBlock->process[this->bankOfRegistrars.getPc()-1] << " solucionado por cache\n";
-    vector<string> comands = splitLineOfCodeBySpace(processBlock->process[this->bankOfRegistrars.getPc()-1]);
+void ControlUnit::cacheHIT(MemoryPage *processBlock, Cache *cache, int result) {
+    cout << "\n\tComando: \'" << processBlock->process[this->bankOfRegistrars.getPc()-1] << "\' solucionado por cache!";
+    vector<string> comands = splitLineOfCodeBySpace(processBlock->process[this->bankOfRegistrars.getPc()-1]); 
     if (comands[0] == "ADD"){
-        this->bankOfRegistrars.setValue(stoi(comands[3]), cache->getCacheCell(address).result);
+        this->bankOfRegistrars.setValue(stoi(comands[3]), result);
         this->bankOfRegistrars.setDirty(stoi(comands[3]));
         processBlock->numberClocksEstimated--;
         cout << "\tclocks pulados: 1\n\n";
     } else if (comands[0] == "SUB"){
-        this->bankOfRegistrars.setValue(stoi(comands[3]), cache->getCacheCell(address).result);
+        this->bankOfRegistrars.setValue(stoi(comands[3]), result);
         this->bankOfRegistrars.setDirty(stoi(comands[3]));
         processBlock->numberClocksEstimated--;
         cout << "\tclocks pulados: 1\n\n";
     } else if(comands[0] == "FOR"){
         int amountTimes = stoi(comands[2]);
         if(comands[1] == "SUB"){
-            this->bankOfRegistrars.setValue(stoi(comands[2]), cache->getCacheCell(address).result);
-            this->bankOfRegistrars.setDirty(stoi(comands[2]));
+            this->bankOfRegistrars.setValue(stoi(comands[4]), result);
+            this->bankOfRegistrars.setDirty(stoi(comands[4]));
         } else if(comands[1] == "ADD"){
-            this->bankOfRegistrars.setValue(stoi(comands[2]), cache->getCacheCell(address).result);
-            this->bankOfRegistrars.setDirty(stoi(comands[2]));
+            this->bankOfRegistrars.setValue(stoi(comands[4]), result);
+            this->bankOfRegistrars.setDirty(stoi(comands[4]));
         }
         processBlock->numberClocksEstimated = processBlock->numberClocksEstimated - amountTimes;
-        cout << "\tclocks pulados: "<< amountTimes << "\n\n";
+        this->bankOfRegistrars.setPc(this->bankOfRegistrars.getPc() + 1);
     } else {
         throw invalid_argument(" ControlUnit::cacheHIT(Invalid Comand input)");  
     }
-
 }
 
 vector<string> ControlUnit::splitLineOfCodeBySpace(string input) {

@@ -28,7 +28,6 @@ void Cache::save(string instructionCode, int resultCode) {
     CacheCell newCell; // cria nova célula no padrão da Mémoria Cache
     newCell.instruction = instructionCode;
     newCell.result = resultCode;
-    cout << "\n\n\tinseriu na cashe: ["<< newCell.instruction << ", " << newCell.result <<  ", " << newCell.amountTimesUsed << "]\n\n";
     if(this->cache.size() < this->capacity){ // se a cache não estiver cheia
         this->cache.push_back(newCell); // salva normalmente
         return;
