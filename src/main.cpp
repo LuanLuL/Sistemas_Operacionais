@@ -13,7 +13,7 @@
 #include "CentralProcessesUnit.hpp"
 #include "InputsOutputs.hpp"
 
-#define AMOUNT_PROCESSES 1
+#define AMOUNT_PROCESSES 3
 #define AMOUNT_REGISTERS_ADDRESS 32
 #define AMOUNT_MEMORY_ADDRESS 1024
 #define AMOUNT_CASHE_ADDRESS 32
@@ -30,6 +30,7 @@ void readDisc(RamMemory &ram);
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void shortestJobFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
+void greatestsimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram, InputsOutputs *io, Cache *cacheMemory);
 
 int main() {
@@ -45,10 +46,11 @@ int main() {
     cout << "1 - First Job First Service (FIFO)\n";
     cout << "2 - Shortest Job First (SJF)\n";
     cout << "3 - Highest Priority First (HPF)\n";
-    cout << "4 - Sair\n";
+    cout << "4 - Greatest Similarity First (GSF)\n";
+    cout << "5 - Sair\n";
     cout << "\nDigite sua opção: ";
     cin >> option;
-    if(option != 4){ // questiona se irá considerar preempçao ou não
+    if(option != 5){ // questiona se irá considerar preempçao ou não
         bool respondeuCerto = true;
         while(respondeuCerto){
             cout << "\nGostaria de executar de forma preemptiva (sim / nao)? ";
@@ -107,7 +109,21 @@ int main() {
             cout << "\n\nTempo de execução por Highest Priority First (HPF)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
             break;
         }
-        case 4 :
+        case 4: {
+            cout << "\n-------------------------------------------------------------------------------\n";
+            cout << "\tIniciando execução por Greatest Similarity First (GSF): ";
+            cout << "\n-------------------------------------------------------------------------------";
+            auto inicio = std::chrono::high_resolution_clock::now();
+            thread monitorThread(greatestsimilarityFirst, &cpu, &ram, &inOut, &cache);
+            if (monitorThread.joinable()) {
+                monitorThread.join();
+            }
+            auto fim = std::chrono::high_resolution_clock::now();
+            auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
+            cout << "\n\nTempo de execução por Greatest Similarity First (GSF)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
+            break;
+        }
+        case 5 :
             cout << "\nSaindo... \n\n";
             break;
         default:
@@ -221,6 +237,36 @@ void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutpu
         cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
         while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
             MemoryPage currentProcess = RAM->getProcessByPriority(); // sorteia processo por loteria
+            if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
+                cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
+                RAM->addProcess(currentProcess);
+                break;
+            }else{
+                inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
+                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs, cacheMemory));
+            }
+        }
+        for (auto& th : nucleos) {
+            if (th.joinable()) {
+                th.join();
+            }
+        }
+        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milissegundo
+    }
+    cout << "\n\n-------------------------------------------------------------------------------\n";
+    cout << "\tEncerrando execução de processos";
+    cout << "\n-------------------------------------------------------------------------------";
+}
+
+void greatestsimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) {
+    vector<thread> nucleos; // gaveta de núcleos
+    MemoryPage lastProcessRuned; 
+    lastProcessRuned.process = vector<string>{}; // ultimo processo é vazio, pois o primeiro ainda nem existe
+    while (processesExecuted < AMOUNT_PROCESSES) {
+        cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
+        while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
+            MemoryPage currentProcess = RAM->getProcessBySimilarity(lastProcessRuned); // busca o processo com maior similaridade
+            lastProcessRuned = currentProcess; // o utlimo se torna o atual
             if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
                 cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
                 RAM->addProcess(currentProcess);

@@ -6,7 +6,8 @@
 #include <string>
 #include <queue>
 #include <stdexcept>
-#include <random>
+#include <unordered_set>
+#include <algorithm>
 
 using namespace std;
 
@@ -44,8 +45,10 @@ class RamMemory {
         MemoryPage getNextProcess();
         MemoryPage getProcessWithLeastClocks();
         MemoryPage getProcessByPriority();
+        MemoryPage getProcessBySimilarity(MemoryPage lastProcessRuned);
         bool hasProcesses();
         int getNumberOfProcesses();
+        double calculateSimilarityPercentage(vector<string> a, vector<string> b);
 };
 
 #endif

@@ -157,10 +157,72 @@ MemoryPage RamMemory::getProcessByPriority() {
     return maxProcessPriority;
 }
 
+MemoryPage RamMemory::getProcessBySimilarity(MemoryPage lastProcessRuned) {
+    if (this->processQueue.empty()){
+        throw runtime_error("RamMemory::getProcessBySimilarity(No processes in the queue)");
+    }
+    if (lastProcessRuned.process.empty()){ // Se não houver um último processo executado, retorne o primeiro da fila
+        MemoryPage selectedProcess = processQueue.front();
+        processQueue.pop();
+        return selectedProcess;
+    }
+    int queueSize = processQueue.size();
+    if(queueSize == 1){ // Se não houver apenas um processo na fila de espera, retorne o primeiro da fila
+        MemoryPage selectedProcess = processQueue.front(); 
+        processQueue.pop();
+        return selectedProcess;
+    }
+    double maxSimilarity = -1.0;
+    MemoryPage bestMatch;
+    bool foundMatch = false;
+    
+    for (int i = 0; i < queueSize; ++i){
+        MemoryPage currentProcess = processQueue.front(); // Percorre a fila para encontrar o processo com maior percentual de similaridade
+        processQueue.pop();
+        double similarityScore = calculateSimilarityPercentage(lastProcessRuned.process, currentProcess.process);
+        if (similarityScore > maxSimilarity && (lastProcessRuned.id != currentProcess.id)){
+            maxSimilarity = similarityScore;
+            bestMatch = currentProcess;
+            foundMatch = true;
+        } 
+        processQueue.push(currentProcess); // Retorna o processo para a fila de processos em espera
+    }
+    if (!foundMatch){
+        throw runtime_error("RamMemory::getProcessBySimilarity (No process found with similarity)");
+    }
+    int currentQueueSize = processQueue.size();
+    bool removed = false;
+    queue<MemoryPage> newQueue;
+    for (int i = 0; i < currentQueueSize; ++i) { // remove bestMatch da fila de processos em espera
+        MemoryPage currentProcess = processQueue.front();
+        processQueue.pop();
+        if (!removed && currentProcess.id == bestMatch.id) {
+            removed = true;
+            continue;
+        }
+        newQueue.push(currentProcess);
+    }
+    this->processQueue = newQueue;
+    return bestMatch;
+}
+
 bool RamMemory::hasProcesses() {
     return !this->processQueue.empty();
 }
 
 int RamMemory::getNumberOfProcesses() {
     return this->processQueue.size();
+}
+
+double RamMemory::calculateSimilarityPercentage(vector<string> a, vector<string> b) {
+    if (a.empty() || b.empty()) return 0.0;
+    unordered_set<string> setA(a.begin(), a.end());
+    int commonElements = 0;
+    for (string process : b) {
+        if (setA.count(process) > 0) {
+            commonElements++;
+        }
+    }
+    int maxSize = max(a.size(), b.size());
+    return (static_cast<double>(commonElements) / maxSize) * 100.0; // Calculo da porcentagem de similaridade entre dois vectores
 }
