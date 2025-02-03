@@ -32,7 +32,7 @@ void InputsOutputs::setUnoccupied(string key) {
 bool InputsOutputs::isOccupied(string key) const {
     auto it = table.find(key);
     if (it == table.end()) {
-        throw runtime_error("nputsOutputs::isOccupied(Input/Output does not exist)");
+        throw runtime_error("InputsOutputs::isOccupied(Input/Output does not exist)");
     }
     return it->second.second;
 }

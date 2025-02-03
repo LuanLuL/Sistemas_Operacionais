@@ -157,58 +157,67 @@ MemoryPage RamMemory::getProcessByPriority() {
     return maxProcessPriority;
 }
 
-MemoryPage RamMemory::getProcessBySimilarity(MemoryPage lastProcessRuned) {
-    if (this->processQueue.empty()){
-        throw runtime_error("RamMemory::getProcessBySimilarity(No processes in the queue)");
+MemoryPage RamMemory::getProcessBySimilarity(int lastProcessRuned) {
+    if (this->processQueue.empty()) {
+        throw runtime_error("RamMemory::getProcessBySimilarity (No processes in the queue)");
     }
-    if (lastProcessRuned.process.empty()){ // Se não houver um último processo executado, retorne o primeiro da fila
-        MemoryPage selectedProcess = processQueue.front();
-        processQueue.pop();
+    if (lastProcessRuned < 0 || processQueue.size() == 1) {  // Se não houver apenas um processo na fila, retorne o primeiro da fila
+        MemoryPage selectedProcess = processQueue.front();   // Se não houver um último processo executado, retorne o primeiro da fila
+        processQueue.pop();  
         return selectedProcess;
     }
-    int queueSize = processQueue.size();
-    if(queueSize == 1){ // Se não houver apenas um processo na fila de espera, retorne o primeiro da fila
-        MemoryPage selectedProcess = processQueue.front(); 
-        processQueue.pop();
-        return selectedProcess;
+    queue<MemoryPage> tempQueue = processQueue;
+    vector<MemoryPage> processList;
+    while (!tempQueue.empty()) {
+        processList.push_back(tempQueue.front());
+        tempQueue.pop();
     }
     double maxSimilarity = -1.0;
-    MemoryPage bestMatch;
-    bool foundMatch = false;
-    
-    for (int i = 0; i < queueSize; ++i){
-        MemoryPage currentProcess = processQueue.front(); // Percorre a fila para encontrar o processo com maior percentual de similaridade
-        processQueue.pop();
-        double similarityScore = calculateSimilarityPercentage(lastProcessRuned.process, currentProcess.process);
-        if (similarityScore > maxSimilarity && (lastProcessRuned.id != currentProcess.id)){
-            maxSimilarity = similarityScore;
-            bestMatch = currentProcess;
-            foundMatch = true;
-        } 
-        processQueue.push(currentProcess); // Retorna o processo para a fila de processos em espera
-    }
-    if (!foundMatch){
-        throw runtime_error("RamMemory::getProcessBySimilarity (No process found with similarity)");
-    }
-    int currentQueueSize = processQueue.size();
-    bool removed = false;
-    queue<MemoryPage> newQueue;
-    for (int i = 0; i < currentQueueSize; ++i) { // remove bestMatch da fila de processos em espera
-        MemoryPage currentProcess = processQueue.front();
-        processQueue.pop();
-        if (!removed && currentProcess.id == bestMatch.id) {
-            removed = true;
-            continue;
+    MemoryPage mostSimilarProcess;
+    int mostSimilarIndex = -1;  // Índice do processo mais semelhante
+    for (int i = 0; i < this->similarityMatrix.size(); i++) {  // Encontrar o processo mais semelhante
+        if (i != lastProcessRuned && isProcessesin(i+1)) {
+            double similarity = similarityMatrix[lastProcessRuned][i];
+            if (similarity > maxSimilarity) {
+                maxSimilarity = similarity;
+                mostSimilarIndex = i;
+            }
         }
-        newQueue.push(currentProcess);
     }
-    this->processQueue = newQueue;
-    return bestMatch;
+    for (int i = 0; i < processList.size(); i++) {
+        MemoryPage item = processList[i];
+        if (item.id == mostSimilarIndex+1) {
+            mostSimilarProcess = item;
+        }
+    }
+    queue<MemoryPage> updatedQueue; // Remover o processo mais similar da fila
+    for (int i = 0; i < processList.size(); i++) {
+        MemoryPage item = processList[i];
+        if (item.id != mostSimilarProcess.id) {
+            updatedQueue.push(processList[i]);
+        }
+    }
+    processQueue = updatedQueue;
+    return mostSimilarProcess;
 }
+
 
 bool RamMemory::hasProcesses() {
     return !this->processQueue.empty();
 }
+
+bool RamMemory::isProcessesin(int id) {
+    queue<MemoryPage> tempQueue = this->processQueue; 
+    while (!tempQueue.empty()) {
+        if (tempQueue.front().id == id) {
+            return true; 
+        }
+        tempQueue.pop(); 
+    }
+    return false; 
+}
+
+
 
 int RamMemory::getNumberOfProcesses() {
     return this->processQueue.size();
@@ -226,3 +235,32 @@ double RamMemory::calculateSimilarityPercentage(vector<string> a, vector<string>
     int maxSize = max(a.size(), b.size());
     return (static_cast<double>(commonElements) / maxSize) * 100.0; // Calculo da porcentagem de similaridade entre dois vectores
 }
+
+void RamMemory::precomputeSimilarities() {
+    vector<MemoryPage> processList;
+    queue<MemoryPage> tempQueue = processQueue; // Copia os processos para um vetor temporário
+    while (!tempQueue.empty()) {
+        processList.push_back(tempQueue.front());
+        tempQueue.pop();
+    }
+    int n = processList.size();
+    this->similarityMatrix.resize(n, vector<double>(n, 0.0));
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            double similarity = calculateSimilarityPercentage(processList[i].process, processList[j].process);
+            this->similarityMatrix[i][j] = similarity;
+            this->similarityMatrix[j][i] = similarity; // Matriz simétrica
+            cout << "[" << i << "]["<< j << "] = "<<  similarityMatrix[j][i] << "\n";
+        }
+    }
+}
+
+void RamMemory::finishProcess(int processFinished) {
+    for (int i = 0; i < this->similarityMatrix.size(); ++i) { // Zera a similaridade do processFinished com todos os outros
+        if (i != processFinished) {
+            this->similarityMatrix[processFinished][i] = 0;
+            this->similarityMatrix[i][processFinished] = 0; // Como a matriz é simétrica, zera também a posição [i][x]
+        }
+    }
+}
+    

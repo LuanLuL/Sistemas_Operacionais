@@ -26,13 +26,13 @@ int CentralProcessesUnit::execute(MemoryPage *processPage, RamMemory *ram, Cache
             this->swapProgram(processPage, ram, 1);
             return -1;
         }
-        int* isPorcessSimilar = cache->isSimilar(processPage->process[this->controlUnit.getBankOfRegistrars()->getPc()-1]);
-        if(isPorcessSimilar != NULL){
-            this->controlUnit.cacheHIT(processPage, cache, (*isPorcessSimilar));
-        } else{
+        // int* isPorcessSimilar = cache->isSimilar(processPage->process[this->controlUnit.getBankOfRegistrars()->getPc()-1]);
+        // if(isPorcessSimilar != NULL){
+        //     this->controlUnit.cacheHIT(processPage, cache, (*isPorcessSimilar));
+        // } else{
             controlUnit.ULA(processPage, ram, cache);
             processPage->numberClocksEstimated--; // dimnui um de clock estimado a cada execução
-        }
+        //}
         this->clocks++;
         timeQuantum++;
         

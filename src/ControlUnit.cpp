@@ -85,18 +85,15 @@ void ControlUnit::ULA(MemoryPage *processBlock, RamMemory *ram, Cache *cache) {
 }
 
 void ControlUnit::cacheHIT(MemoryPage *processBlock, Cache *cache, int result) {
-    cout << "\n\tComando: \'" << processBlock->process[this->bankOfRegistrars.getPc()-1] << "\' solucionado por cache!";
     vector<string> comands = splitLineOfCodeBySpace(processBlock->process[this->bankOfRegistrars.getPc()-1]); 
     if (comands[0] == "ADD"){
         this->bankOfRegistrars.setValue(stoi(comands[3]), result);
         this->bankOfRegistrars.setDirty(stoi(comands[3]));
         processBlock->numberClocksEstimated--;
-        cout << "\tclocks pulados: 1\n\n";
     } else if (comands[0] == "SUB"){
         this->bankOfRegistrars.setValue(stoi(comands[3]), result);
         this->bankOfRegistrars.setDirty(stoi(comands[3]));
         processBlock->numberClocksEstimated--;
-        cout << "\tclocks pulados: 1\n\n";
     } else if(comands[0] == "FOR"){
         int amountTimes = stoi(comands[2]);
         if(comands[1] == "SUB"){

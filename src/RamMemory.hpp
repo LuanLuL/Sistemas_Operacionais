@@ -31,6 +31,7 @@ class RamMemory {
     private: 
         vector<MemoryCell> memoryCells;
         queue<MemoryPage> processQueue;
+        vector<vector<double>> similarityMatrix;
         int size;
     public:
         RamMemory(int size);
@@ -45,10 +46,13 @@ class RamMemory {
         MemoryPage getNextProcess();
         MemoryPage getProcessWithLeastClocks();
         MemoryPage getProcessByPriority();
-        MemoryPage getProcessBySimilarity(MemoryPage lastProcessRuned);
+        MemoryPage getProcessBySimilarity(int lastProcessRuned);
         bool hasProcesses();
+        bool isProcessesin(int id);
         int getNumberOfProcesses();
         double calculateSimilarityPercentage(vector<string> a, vector<string> b);
+        void precomputeSimilarities();
+        void finishProcess(int processFinished);
 };
 
 #endif

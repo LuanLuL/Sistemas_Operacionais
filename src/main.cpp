@@ -13,9 +13,9 @@
 #include "CentralProcessesUnit.hpp"
 #include "InputsOutputs.hpp"
 
-#define AMOUNT_PROCESSES 3
-#define AMOUNT_REGISTERS_ADDRESS 32
-#define AMOUNT_MEMORY_ADDRESS 1024
+#define AMOUNT_PROCESSES 6 // NÃO RECOMENDADO AUMENTAR O NÚMERO DE PROCESSOS PARA MAIS DE QUATRO !!!
+#define AMOUNT_REGISTERS_ADDRESS 1032
+#define AMOUNT_MEMORY_ADDRESS 1032
 #define AMOUNT_CASHE_ADDRESS 32
 
 using namespace std;
@@ -30,7 +30,7 @@ void readDisc(RamMemory &ram);
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void shortestJobFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
-void greatestsimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
+void greatestSimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram, InputsOutputs *io, Cache *cacheMemory);
 
 int main() {
@@ -114,7 +114,7 @@ int main() {
             cout << "\tIniciando execução por Greatest Similarity First (GSF): ";
             cout << "\n-------------------------------------------------------------------------------";
             auto inicio = std::chrono::high_resolution_clock::now();
-            thread monitorThread(greatestsimilarityFirst, &cpu, &ram, &inOut, &cache);
+            thread monitorThread(greatestSimilarityFirst, &cpu, &ram, &inOut, &cache);
             if (monitorThread.joinable()) {
                 monitorThread.join();
             }
@@ -175,6 +175,7 @@ void readDisc(RamMemory &ram) {
             cerr << "Erro ao abrir o arquivo: " << filename << endl;
         }
     }
+    ram.precomputeSimilarities();
 }
 
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) { // monitora a CPU
@@ -187,7 +188,7 @@ void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutp
                 cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
                 RAM->addProcess(currentProcess);
                 break;
-            }else{
+            }else {
                 inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
                 nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs, cacheMemory));
             }
@@ -258,20 +259,20 @@ void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutpu
     cout << "\n-------------------------------------------------------------------------------";
 }
 
-void greatestsimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) {
+void greatestSimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) {
     vector<thread> nucleos; // gaveta de núcleos
     MemoryPage lastProcessRuned; 
-    lastProcessRuned.process = vector<string>{}; // ultimo processo é vazio, pois o primeiro ainda nem existe
+    lastProcessRuned.id = 0;
     while (processesExecuted < AMOUNT_PROCESSES) {
         cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
         while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
-            MemoryPage currentProcess = RAM->getProcessBySimilarity(lastProcessRuned); // busca o processo com maior similaridade
+            MemoryPage currentProcess = RAM->getProcessBySimilarity((lastProcessRuned.id-1)); // busca o processo com maior similaridade
             lastProcessRuned = currentProcess; // o utlimo se torna o atual
             if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
                 cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
                 RAM->addProcess(currentProcess);
                 break;
-            }else{
+            }else {
                 inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
                 nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs, cacheMemory));
             }
@@ -302,5 +303,6 @@ void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, R
         cout << "\n\tLiberando o " << processPage.inputOutput << ".";
         io->setUnoccupied(processPage.inputOutput);
         processesExecuted++;
+        ram->finishProcess((processPage.id-1));
     }
 }

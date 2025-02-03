@@ -20,7 +20,7 @@
     </p>
     <br>
     <p align="center">
-        <img src="img/Esquema_SO.png">
+        <img src="img/Esquema_SO-Without_Instructions.png">
         <br><br><strong>Figura 1:</strong> Desenho sobre o Simulador da Arquitetura de Von Neumann e Pipeline MIPS
     </p>
     <br>
@@ -88,8 +88,20 @@
             A classe <code>InputsOutputs</code> abstrai os periféricos de uma arquitetura computacional, permitindo o gerenciamento do uso concorrente desses dispositivos por diferentes processos. Ela funciona como uma tabela que armazena os periféricos – por padrão, o simulador possui apenas 5 periféricos disponíveis: Mouse, Teclado, Monitor, Impressora e Fone de Ouvido – e associa a cada um deles um par contendo o identificador do processo que o está utilizando e um estado booleano que indica se o periférico está ocupado. Em resumo, <code>InputsOutputs</code> facilita o controle de concorrência sobre os periféricos, garantindo que apenas um processo possa usar um dispositivo por vez, evitando conflitos.
         </p>
     </div>
+     <div>
+        <h3>6) Memória Cache</h3>
+        <p>
+           A estrutura da cache desenvolvida é composta por células de memória, denominadas<code>CacheCell</code>, cada uma contendo três atributos principais: uma instrução, o resultado associado a essa instrução  e um contador de uso . O contador é utilizado para implementar uma política de substituição baseada na quantidade de acessos, similar ao algoritmo <strong>Least Frequently Used (LFU)</strong>. Essa escolha tem como objetivo manter na cache os dados que possuem maior probabilidade de reutilização, otimizando o desempenho durante a execução de jobs semelhantes.
+        </p>
+        <p>
+            A implementação do método de substituição está centralizada na função <code>Cache::findReplaceIndex()</code>, que percorre todas as células da cache e identifica aquela que foi menos reutilizada. Quando a capacidade máxima da cache é atingida, a célula com menor frequência de uso é substituída por uma nova entrada. O método <code>Cache::save()</code> realiza essa lógica de forma eficiente, permitindo a gravação de instruções e seus respectivos resultados na cache.
+        </p>
+        <p>
+            O objetivo dessa estrutura é identificar instruções similares e evitar redundâncias no processamento. Para isso, o método <code>Cache::isSimilar()</code> realiza uma busca na cache para verificar se o resultado de uma instrução já está armazenado. Caso positivo, o valor correspondente é imediatamente retornado, e o contador de uso da célula é incrementado. Essa abordagem elimina a necessidade de recomputação de operações previamente realizadas, resultando em uma economia significativa de ciclos na pipeline. Como consequência, o sistema otimiza o tempo de processamento e melhora o desempenho geral.
+        </p>
+    </div>
     <div>
-        <h3>6) Memória ROM</h3>
+        <h3>7) Memória ROM</h3>
         <p>
             No simulador, a memória ROM não é implementada como uma classe, mas sim através de <b>arquivos de texto</b> (<code>.txt</code>) que armazenam os comandos a serem executados. Esses arquivos seguem uma convenção de nomenclatura padronizada: <code>codigo1.txt</code>, <code>codigo2.txt</code>, <code>codigo3.txt</code>, e assim por diante, até <code>codigoN.txt</code>. Essa estrutura permite que vários códigos/processos sejam executados de forma sequencial ou conforme a necessidade, bastando ajustar a variável que define a quantidade de códigos no arquivo <code>main.cpp</code> do sistema.
         </p>
