@@ -250,7 +250,6 @@ void RamMemory::precomputeSimilarities() {
             double similarity = calculateSimilarityPercentage(processList[i].process, processList[j].process);
             this->similarityMatrix[i][j] = similarity;
             this->similarityMatrix[j][i] = similarity; // Matriz simétrica
-            cout << "[" << i << "]["<< j << "] = "<<  similarityMatrix[j][i] << "\n";
         }
     }
 }
