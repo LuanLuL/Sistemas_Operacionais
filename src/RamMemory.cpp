@@ -201,7 +201,6 @@ MemoryPage RamMemory::getProcessBySimilarity(int lastProcessRuned) {
     return mostSimilarProcess;
 }
 
-
 bool RamMemory::hasProcesses() {
     return !this->processQueue.empty();
 }
@@ -216,8 +215,6 @@ bool RamMemory::isProcessesin(int id) {
     }
     return false; 
 }
-
-
 
 int RamMemory::getNumberOfProcesses() {
     return this->processQueue.size();
