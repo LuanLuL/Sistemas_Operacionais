@@ -1,13 +1,15 @@
 #ifndef RAM_MEMORY_HPP
 #define RAM_MEMORY_HPP
 
-#include <iostream>
+#include "Mmu.hpp"
+
 #include <vector>
 #include <string>
 #include <queue>
 #include <stdexcept>
 #include <unordered_set>
 #include <algorithm>
+#include <unordered_map>
 
 using namespace std;
 
@@ -30,8 +32,8 @@ typedef struct MemoryCell {
 class RamMemory {
     private: 
         vector<MemoryCell> memoryCells;
-        queue<MemoryPage> processQueue;
-        vector<vector<double>> similarityMatrix;
+        unordered_map<int, MemoryPage> listOfProcess;
+        Mmu virtualAddresses;
         int size;
     public:
         RamMemory(int size);
@@ -48,11 +50,7 @@ class RamMemory {
         MemoryPage getProcessByPriority();
         MemoryPage getProcessBySimilarity(int lastProcessRuned);
         bool hasProcesses();
-        bool isProcessesin(int id);
         int getNumberOfProcesses();
-        double calculateSimilarityPercentage(vector<string> a, vector<string> b);
-        void precomputeSimilarities();
-        void finishProcess(int processFinished);
 };
 
 #endif

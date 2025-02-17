@@ -13,7 +13,7 @@
 #include "CentralProcessesUnit.hpp"
 #include "InputsOutputs.hpp"
 
-#define AMOUNT_PROCESSES 6 // NÃO RECOMENDADO AUMENTAR O NÚMERO DE PROCESSOS PARA MAIS DE QUATRO !!!
+#define AMOUNT_PROCESSES 6
 #define AMOUNT_REGISTERS_ADDRESS 1032
 #define AMOUNT_MEMORY_ADDRESS 1032
 #define AMOUNT_CASHE_ADDRESS 32
@@ -28,9 +28,6 @@ bool preemptivo = false;
 
 void readDisc(RamMemory &ram);
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
-void shortestJobFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
-void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
-void greatestSimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory);
 void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, RamMemory* ram, InputsOutputs *io, Cache *cacheMemory);
 
 int main() {
@@ -44,13 +41,10 @@ int main() {
     string option2 = "";
     cout << "\nEscolha algum método de escalonamento: \n\n";
     cout << "1 - First Job First Service (FIFO)\n";
-    cout << "2 - Shortest Job First (SJF)\n";
-    cout << "3 - Highest Priority First (HPF)\n";
-    cout << "4 - Greatest Similarity First (GSF)\n";
-    cout << "5 - Sair\n";
+    cout << "2 - Sair\n";
     cout << "\nDigite sua opção: ";
     cin >> option;
-    if(option != 5){ // questiona se irá considerar preempçao ou não
+    if(option != 2){ // questiona se irá considerar preempçao ou não
         bool respondeuCerto = true;
         while(respondeuCerto){
             cout << "\nGostaria de executar de forma preemptiva (sim / nao)? ";
@@ -81,49 +75,7 @@ int main() {
             cout << "\n\nTempo de execução por First Job First Service (FIFO)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
             break;
         }
-        case 2: {
-            cout << "\n-------------------------------------------------------------------------------\n";
-            cout << "\tIniciando execução por Shortest Job First (SJF): ";
-            cout << "\n-------------------------------------------------------------------------------";
-            auto inicio = std::chrono::high_resolution_clock::now();
-            thread monitorThread(shortestJobFirst, &cpu, &ram, &inOut, &cache);
-            if (monitorThread.joinable()) {
-                monitorThread.join();
-            }
-            auto fim = std::chrono::high_resolution_clock::now();
-            auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
-            cout << "\n\nTempo de execução por Shortest Job First (SJF)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
-            break;
-        }
-        case 3: {
-            cout << "\n-------------------------------------------------------------------------------\n";
-            cout << "\tIniciando execução por Highest Priority First (HPF): ";
-            cout << "\n-------------------------------------------------------------------------------";
-            auto inicio = std::chrono::high_resolution_clock::now();
-            thread monitorThread(highestPriorityFirst, &cpu, &ram, &inOut, &cache);
-            if (monitorThread.joinable()) {
-                monitorThread.join();
-            }
-            auto fim = std::chrono::high_resolution_clock::now();
-            auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
-            cout << "\n\nTempo de execução por Highest Priority First (HPF)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
-            break;
-        }
-        case 4: {
-            cout << "\n-------------------------------------------------------------------------------\n";
-            cout << "\tIniciando execução por Greatest Similarity First (GSF): ";
-            cout << "\n-------------------------------------------------------------------------------";
-            auto inicio = std::chrono::high_resolution_clock::now();
-            thread monitorThread(greatestSimilarityFirst, &cpu, &ram, &inOut, &cache);
-            if (monitorThread.joinable()) {
-                monitorThread.join();
-            }
-            auto fim = std::chrono::high_resolution_clock::now();
-            auto duracao = std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio); // calcula o tempo de duração do programa em milessegundos
-            cout << "\n\nTempo de execução por Greatest Similarity First (GSF)" << (preemptivo ? " preemptivo: " : " não preemptvo: ") << duracao.count() << " ms\n\n";
-            break;
-        }
-        case 5 :
+        case 2 :
             cout << "\nSaindo... \n\n";
             break;
         default:
@@ -175,7 +127,6 @@ void readDisc(RamMemory &ram) {
             cerr << "Erro ao abrir o arquivo: " << filename << endl;
         }
     }
-    ram.precomputeSimilarities();
 }
 
 void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) { // monitora a CPU
@@ -184,90 +135,6 @@ void firstComeFirstService(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutp
         cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
         while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
             MemoryPage currentProcess = RAM->getNextProcess(); // seleciona o primeiro processo
-            if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
-                cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
-                RAM->addProcess(currentProcess);
-                break;
-            }else {
-                inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
-                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs, cacheMemory));
-            }
-        }
-        for (auto& th : nucleos) {
-            if (th.joinable()) {
-                th.join();
-            }
-        }
-        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milissegundo
-    }
-    cout << "\n\n-------------------------------------------------------------------------------\n";
-    cout << "\tEncerrando execução de processos";
-    cout << "\n-------------------------------------------------------------------------------";
-}
-
-void shortestJobFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) {
-    vector<thread> nucleos; // gaveta de núcleos
-    while (processesExecuted < AMOUNT_PROCESSES) {
-        cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
-        while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
-            MemoryPage currentProcess = RAM->getProcessWithLeastClocks(); // seleciona o menor processo
-            if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
-                cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
-                RAM->addProcess(currentProcess);
-                break;
-            }else{
-                inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
-                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs, cacheMemory));
-            } 
-        }
-        for (auto& th : nucleos) {
-            if (th.joinable()) {
-                th.join();
-            }
-        }
-        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milissegundo
-    }
-    cout << "\n\n-------------------------------------------------------------------------------\n";
-    cout << "\tEncerrando execução de processos";
-    cout << "\n-------------------------------------------------------------------------------";
-}
-
-void highestPriorityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) {
-    vector<thread> nucleos; // gaveta de núcleos
-    while (processesExecuted < AMOUNT_PROCESSES) {
-        cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
-        while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
-            MemoryPage currentProcess = RAM->getProcessByPriority(); // sorteia processo por loteria
-            if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
-                cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
-                RAM->addProcess(currentProcess);
-                break;
-            }else{
-                inputsOutputs->setOcccupied(currentProcess.inputOutput, make_pair(currentProcess.id, true));
-                nucleos.push_back(thread(executeProcessInThread, CPU, currentProcess, RAM, inputsOutputs, cacheMemory));
-            }
-        }
-        for (auto& th : nucleos) {
-            if (th.joinable()) {
-                th.join();
-            }
-        }
-        this_thread::sleep_for(chrono::microseconds(1000)); // observa a acada 1 milissegundo
-    }
-    cout << "\n\n-------------------------------------------------------------------------------\n";
-    cout << "\tEncerrando execução de processos";
-    cout << "\n-------------------------------------------------------------------------------";
-}
-
-void greatestSimilarityFirst(CentralProcessesUnit *CPU, RamMemory *RAM, InputsOutputs *inputsOutputs, Cache *cacheMemory) {
-    vector<thread> nucleos; // gaveta de núcleos
-    MemoryPage lastProcessRuned; 
-    lastProcessRuned.id = 0;
-    while (processesExecuted < AMOUNT_PROCESSES) {
-        cout << "\n\n" << (AMOUNT_PROCESSES - processesExecuted) << " processos restantes\n";
-        while(RAM->hasProcesses()){ // enquanto tiver processos para rodar, execute os processo
-            MemoryPage currentProcess = RAM->getProcessBySimilarity((lastProcessRuned.id-1)); // busca o processo com maior similaridade
-            lastProcessRuned = currentProcess; // o utlimo se torna o atual
             if(inputsOutputs->isOccupied(currentProcess.inputOutput)){ // verifica a concorrência entre os Recursos do SO
                 cout << "\n\tProcesso " << currentProcess.id << " não pode executar agora, pois o " << currentProcess.inputOutput << " está ocupado.";
                 RAM->addProcess(currentProcess);
@@ -303,6 +170,5 @@ void executeProcessInThread(CentralProcessesUnit* cpu, MemoryPage processPage, R
         cout << "\n\tLiberando o " << processPage.inputOutput << ".";
         io->setUnoccupied(processPage.inputOutput);
         processesExecuted++;
-        ram->finishProcess((processPage.id-1));
     }
 }
