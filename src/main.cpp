@@ -14,7 +14,7 @@
 #include "InputsOutputs.hpp"
 
 #define AMOUNT_PROCESSES 6
-#define AMOUNT_REGISTERS_ADDRESS 1032
+#define AMOUNT_REGISTERS_ADDRESS 32
 #define AMOUNT_MEMORY_ADDRESS 1032
 #define AMOUNT_CASHE_ADDRESS 32
 
@@ -118,7 +118,9 @@ void readDisc(RamMemory &ram) {
                 }
             }
             page.id = i;
-            page.processCount = 1;
+            page.allocationBegins = (i - 1) * AMOUNT_REGISTERS_ADDRESS;
+            page.allocationEnds = page.allocationBegins + AMOUNT_REGISTERS_ADDRESS - 1;
+            page.processCount = 1; 
             page.process = fileLines;
             page.numberClocksEstimated = numberClocksEstimated;
             ram.addProcess(page);

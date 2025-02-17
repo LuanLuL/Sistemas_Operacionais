@@ -20,6 +20,8 @@ typedef struct MemoryPage {
     int priority;
     vector<string> process;
     string inputOutput;
+    int allocationBegins;
+    int allocationEnds;
 } MemoryPage;
 
 typedef struct MemoryCell {
