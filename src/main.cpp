@@ -118,8 +118,7 @@ void readDisc(RamMemory &ram) {
                 }
             }
             page.id = i;
-            page.allocationBegins = (i - 1) * AMOUNT_REGISTERS_ADDRESS;
-            page.allocationEnds = page.allocationBegins + AMOUNT_REGISTERS_ADDRESS - 1;
+            page.allocation = make_pair((i - 1) * AMOUNT_REGISTERS_ADDRESS, ((i - 1) * AMOUNT_REGISTERS_ADDRESS) + AMOUNT_REGISTERS_ADDRESS - 1);
             page.processCount = 1; 
             page.process = fileLines;
             page.numberClocksEstimated = numberClocksEstimated;
