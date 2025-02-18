@@ -44,7 +44,7 @@ int main() {
     cout << "2 - Sair\n";
     cout << "\nDigite sua opção: ";
     cin >> option;
-    if(option != 2){ // questiona se irá considerar preempçao ou não
+    if(option == 1){ // questiona se irá considerar preempçao ou não
         bool respondeuCerto = true;
         while(respondeuCerto){
             cout << "\nGostaria de executar de forma preemptiva (sim / nao)? ";
